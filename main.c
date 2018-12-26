@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
 
 int main(void)
 {
@@ -19,6 +20,7 @@ int main(void)
     double avg;
     short students;
     double total;
+    double cumulative_deviations_squared = 0;
 
     // Open input file
     ifp = fopen(inputFilename, mode);
@@ -38,22 +40,44 @@ int main(void)
 
     fprintf(ofp, "Students: \n");
 
+    /*
+     * Scan the file while the input count is valid (no issues with inputs
+     */
     while (fscanf(ifp, "%s %d", name, &score) == 2) {
         // Add to the student and score cumulative counters
         students++;
         total += score;
 
-        // Re-calculate the running average
+        // Re-calculate a running average
         avg = total / students;
 
         // Print student name
         fprintf(ofp, ": %s \n", name);
     }
 
-    fprintf(ofp, "Statistics: \n");
+    ifp = fopen(inputFilename, mode);
 
-    fprintf(ofp, "Average grade: %d%%\n", (int) avg);
+    /*
+     * Scan the file while the input count is valid (no issues with inputs
+     */
+    while (fscanf(ifp, "%s %d", name, &score) == 2) {
+        // Get difference
+        double diff = ((double) score) - avg;
+        // Square it
+        diff = diff * diff;
+        // Add to sum
+        cumulative_deviations_squared += diff;
+    }
 
+    double stdDev = sqrt(cumulative_deviations_squared / students);
+
+
+    fprintf(ofp, "\nStatistics: \n");
+
+    fprintf(ofp, "Average grade: %.1f%%\n", avg);
+    fprintf(ofp, "Standard deviation: %.3f", stdDev);
+
+    // Close input and output files
     fclose(ifp);
     fclose(ofp);
 
